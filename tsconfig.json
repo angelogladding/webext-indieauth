@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
+    "allowJs": true,
+    "target": "es6",
+    "baseUrl": ".",
+    "paths": {
+      "webextension-polyfill": ["node_modules/webextension-polyfill/dist/browser-polyfill"],
+      "js-sha256": ["node_modules/js-sha256/src/sha256"]
+    }
+  },
+  "files": ["index.ts"]
+}
