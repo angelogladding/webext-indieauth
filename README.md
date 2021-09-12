@@ -15,9 +15,9 @@ You must include the following in a background context:
 
 Then you can call the following from any context (eg. popup, sidebar, ..):
 
-    const { signIn, signOut } = requires("webextension-indieauth")
-    signIn("exampleuser.com", "exampleclient.com");  // acquire auth
-    signOut();  // revoke auth
+    const indieauth = requires("webextension-indieauth")
+    indieauth.signIn("exampleuser.com", "exampleclient.com")
+    indieauth.signOut()
 
 ### User Data
 
@@ -31,23 +31,25 @@ User data is stored in the following format:
       },
       endpoints: {
         authorization: "https://exampleuser.com/auth",
-        token: "https://exampleuser.com/token",
-        micropub: "https://exampleuser.com/micropub",
-        microsub: "https://exampleuser.com/microsub",
-        webmention: "https://exampleuser.com/webmention"
+        token: "https://exampleuser.com/auth/tokens",
+        ticket: "https://exampleuser.com/auth/tickets",
+        micropub: "https://exampleuser.com/pub",
+        microsub: "https://exampleuser.com/sub",
+        webmention: "https://exampleuser.com/mentions"
       },
       code: "hf904hkfx049fkhx943ufh3094ux09ufhnhfhf",
-      accessToken: "c9q8jif4l34h",
-      refreshToken: "er8j3cj49f4e"
+      accessToken: "secret-token:c9q8jif4l34h",
+      refreshToken: "secret-token:er8j3cj49f4e"
     }
 
-Access via the `storage` API:
+Access via the [`storage` API][4]:
 
-    browser.storage.local.get(["me", "endpoints"]).then(db => {
-        console.log(db.me, db.endpoints)
-    });
+    browser.storage.local.get(["me", "endpoints", "accessToken"]).then(items => {
+        console.log(items.me, items.endpoints.micropub, items.accessToken)
+    })
 
-[0]: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/identity
-[1]: https://indieauth.spec.indieweb.org
-[2]: https://micropub.spec.indieweb.org
-[3]: https://indieweb.org/Microsub-spec
+[0]: //developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/identity
+[1]: //indieauth.spec.indieweb.org
+[2]: //micropub.spec.indieweb.org
+[3]: //indieweb.org/Microsub-spec
+[4]: //developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/local
