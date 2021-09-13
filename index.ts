@@ -179,9 +179,3 @@ const generateCode = (length) => {
   }
   return code
 }
-
-// XXX module.exports = {
-// XXX   signIn: signIn,
-// XXX   signOut: signOut,
-// XXX   getUser: getUser
-// XXX }
