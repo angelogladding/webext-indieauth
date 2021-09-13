@@ -18,7 +18,7 @@ export const signOut = (): null => {
 }
 
 export const getUser = async (): { me: string, profile: string, code: string,
-  accessToken: string, expiresIn: string, refreshToken: string} => {
+  accessToken: string, expiresIn: string, refreshToken: string } => {
   return await browser.storage.local.get([
     'me', 'profile', 'endpoints', 'code', 'accessToken', 'expiresIn', 'refreshToken'
   ])
