@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill'
-import sha256 from 'js-sha256'
+import CryptoJS from 'crypto-js'
 
 export const signIn = (identityURL: string, clientID: string): null => {
   browser.runtime.sendMessage({
@@ -58,8 +58,7 @@ if (window.location.pathname === '/_generated_background_page.html') {
 const _signIn = (identityURL, clientID) => {
   const state = generateCode(16)
   const codeVerifier = generateCode(128)
-  const scopes = ['create', 'draft', 'update', 'delete', 'media',
-    'profile', 'email']
+  const scopes = ['create', 'draft', 'update', 'delete', 'media', 'profile', 'email']
   let endpoints
   let redirectURL
 
@@ -71,19 +70,22 @@ const _signIn = (identityURL, clientID) => {
     response.text().then((text) => {
       const doc = parse(text, identityURL)
       endpoints = {
-        authorization: get_rel(doc, 'authorization_endpoint'),
-        token: get_rel(doc, 'token_endpoint'),
-        micropub: get_rel(doc, 'micropub'),
-        microsub: get_rel(doc, 'microsub'),
-        webmention: get_rel(doc, 'webmention')
+        authorization: getRel(doc, 'authorization_endpoint'),
+        token: getRel(doc, 'token_endpoint'),
+        ticket: getRel(doc, 'ticket_endpoint'),
+        micropub: getRel(doc, 'micropub'),
+        microsub: getRel(doc, 'microsub'),
+        webmention: getRel(doc, 'webmention')
       }
       redirectURL = browser.identity.getRedirectURL() // *.allizom.org
+      const challenge = CryptoJS.SHA256(codeVerifier).toString(CryptoJS.enc.Base64)
+        .replace(/\+/g, '-').replace(/\//g, '_').replace('=', '')
       const authURL = endpoints.authorization +
         '?response_type=code' +
         `&client_id=${clientID}` +
         `&redirect_uri=${redirectURL}` +
         `&state=${state}` +
-        `&code_challenge=${btoa(sha256(codeVerifier))}` +
+        `&code_challenge=${challenge}` +
         '&code_challenge_method=S256' +
         `&scope=${encodeURIComponent(scopes.join(' '))}` +
         `&me=${identityURL}`
@@ -110,7 +112,7 @@ const _signIn = (identityURL, clientID) => {
         'content-type': 'application/x-www-form-urlencoded'
       },
       body: `grant_type=authorization_code&code=${code}&client_id=${clientID}&` +
-          `redirect_uri=${redirectURL}&code_verifier=${codeVerifier}`
+        `redirect_uri=${redirectURL}&code_verifier=${codeVerifier}`
     }).then((response) => {
       if (response.status !== 200) {
         console.log("couldn't validate authorization")
@@ -160,7 +162,7 @@ const parse = (html, baseURL) => {
   return doc
 }
 
-const get_rel = (doc, rel) => {
+const getRel = (doc, rel) => {
   const link = doc.querySelector(`link[rel=${rel}]`)
   if (link) {
     return link.href
