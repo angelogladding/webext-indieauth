@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill'
 import CryptoJS from 'crypto-js'
 
-export const signIn = (identityURL: string, clientID: string): null => {
+export const signIn = (identityURL: string, clientID: string): void => {
   browser.runtime.sendMessage({
     action: 'sign-in',
     details: {
@@ -11,18 +11,40 @@ export const signIn = (identityURL: string, clientID: string): null => {
   })
 }
 
-export const signOut = (): null => {
+export const signOut = (): void => {
   browser.runtime.sendMessage({
     action: 'sign-out'
   })
 }
 
-export const getUser = async (): { me: string, profile: string, code: string,
-  accessToken: string, expiresIn: string, refreshToken: string } => {
+interface Endpoints {
+    authorization: string,
+    token: string,
+    ticket: string,
+    micropub: string,
+    microsub: string,
+    webmention: string,
+}
+
+export const getUser = async (): Promise<{
+    me: string,
+    profile: string,
+    endpoints: Endpoints,
+    code: string,
+    accessToken: string,
+    expiresIn: string,
+    refreshToken: string,
+  }> => {
   return await browser.storage.local.get([
     'me', 'profile', 'endpoints', 'code', 'accessToken', 'expiresIn', 'refreshToken'
   ])
 }
+
+declare const window: Window &
+  typeof globalThis & {
+    postSignIn: any,
+    postSignOut: any
+  }
 
 let stateCheckerSignIn
 let stateCheckerSignOut
